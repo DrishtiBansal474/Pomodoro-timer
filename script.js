@@ -21,4 +21,36 @@ function startTimer() {
     startBtn.textContent = "Start";
     return;
   }
+
+isRunning = true;
+  startBtn.textContent = "Pause";
+
+  timerId = setInterval(() => {
+    totalSeconds--;
+
+    if (totalSeconds <= 0) {
+      clearInterval(timerId);
+      isRunning = false;
+      totalSeconds = 0;
+      startBtn.textContent = "Start";
+      showTime();
+      alert("Pomodoro session complete!");
+      return;
+    }
+
+    showTime();
+  }, 1000);
 }
+
+function resetTimer() {
+  clearInterval(timerId);
+  totalSeconds = 25 * 60;
+  isRunning = false;
+  startBtn.textContent = "Start";
+  showTime();
+}
+
+startBtn.addEventListener("click", startTimer);
+resetBtn.addEventListener("click", resetTimer);
+
+showTime();
