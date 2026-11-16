@@ -29,3 +29,19 @@ button {
   color: white;
   background: #e5533d;
 }
+.mode-buttons {
+  margin-bottom: 15px;
+}
+
+.mode-buttons button {
+  margin: 5px;
+}
+
+.mode-buttons .active {
+  background: #a93827;
+}
+
+#sessions {
+  color: #666;
+  font-size: 16px;
+}
