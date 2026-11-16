@@ -1,56 +1,7 @@
-const timeText = document.getElementById("time");
-const startBtn = document.getElementById("startBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-let totalSeconds = 25 * 60;
-let timerId = null;
-let isRunning = false;
-
-function showTime() {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  timeText.textContent =
-    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-function startTimer() {
-  if (isRunning) {
-    clearInterval(timerId);
-    isRunning = false;
-    startBtn.textContent = "Start";
-    return;
-  }
-
-isRunning = true;
-  startBtn.textContent = "Pause";
-
-  timerId = setInterval(() => {
-    totalSeconds--;
-
-    if (totalSeconds <= 0) {
-      clearInterval(timerId);
-      isRunning = false;
-      totalSeconds = 0;
-      startBtn.textContent = "Start";
-      showTime();
-      alert("Pomodoro session complete!");
-      return;
-    }
-
-    showTime();
-  }, 1000);
-}
-
-function resetTimer() {
-  clearInterval(timerId);
-  totalSeconds = 25 * 60;
-  isRunning = false;
-  startBtn.textContent = "Start";
-  showTime();
-}
-
-startBtn.addEventListener("click", startTimer);
-resetBtn.addEventListener("click", resetTimer);
-
-showTime();
+const timeText=document.getElementById("time"),startBtn=document.getElementById("startBtn"),resetBtn=document.getElementById("resetBtn"),skipBtn=document.getElementById("skipBtn"),modeLabel=document.getElementById("modeLabel"),hint=document.getElementById("hint"),progressCircle=document.getElementById("progressCircle"),statusText=document.getElementById("statusText"),sessionCount=document.getElementById("sessionCount"),timerCard=document.querySelector(".timer-card"),modeButtons=document.querySelectorAll(".mode-btn");
+const modes={focus:{seconds:1500,label:"Focus time",hint:"One thing at a time.",color:"#dd6b55"},shortBreak:{seconds:300,label:"Short break",hint:"Take a small breath.",color:"#6a9b88"},longBreak:{seconds:900,label:"Long break",hint:"You earned the pause.",color:"#7191ac"}},circumference=2*Math.PI*116;let currentMode="focus",totalSeconds=modes.focus.seconds,remainingSeconds=totalSeconds,timerId,isRunning=false,completedSessions=Number(localStorage.getItem("pomodoroSessions")||0);
+function showTime(){const m=Math.floor(remainingSeconds/60),s=remainingSeconds%60;timeText.textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;timeText.dateTime=`PT${remainingSeconds}S`;progressCircle.style.strokeDasharray=circumference;progressCircle.style.strokeDashoffset=circumference*(1-remainingSeconds/totalSeconds)}
+function updateInterface(){const mode=modes[currentMode];modeLabel.textContent=mode.label;hint.textContent=mode.hint;progressCircle.style.stroke=mode.color;document.documentElement.style.setProperty("--accent",mode.color);modeButtons.forEach(b=>{const on=b.dataset.mode===currentMode;b.classList.toggle("active",on);b.setAttribute("aria-selected",on)});sessionCount.textContent=completedSessions;showTime()}
+function setRunning(running){isRunning=running;timerCard.classList.toggle("is-running",running);startBtn.innerHTML=running?'<span class="play-icon" aria-hidden="true">Ⅱ</span><span>Pause timer</span>':'<span class="play-icon" aria-hidden="true">▶</span><span>Start focus</span>';startBtn.setAttribute("aria-label",running?"Pause timer":"Start timer");statusText.textContent=running?"Deep work in progress":"Ready when you are"}
+function stopTimer(){clearInterval(timerId);timerId=null;setRunning(false)}function setMode(mode){stopTimer();currentMode=mode;totalSeconds=modes[mode].seconds;remainingSeconds=totalSeconds;updateInterface()}function completeTimer(){stopTimer();if(currentMode==="focus"){completedSessions++;localStorage.setItem("pomodoroSessions",completedSessions);sessionCount.textContent=completedSessions}statusText.textContent="Session complete — nice work!";const next=currentMode==="focus"?"shortBreak":"focus";setMode(next)}function startTimer(){if(isRunning){stopTimer();return}setRunning(true);timerId=setInterval(()=>{remainingSeconds--;showTime();if(remainingSeconds<=0)completeTimer()},1000)}function resetTimer(){stopTimer();remainingSeconds=totalSeconds;updateInterface()}function skipMode(){const order=["focus","shortBreak","longBreak"];setMode(order[(order.indexOf(currentMode)+1)%order.length])}
+startBtn.addEventListener("click",startTimer);resetBtn.addEventListener("click",resetTimer);skipBtn.addEventListener("click",skipMode);modeButtons.forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));document.addEventListener("keydown",e=>{if(e.code==="Space"&&!['BUTTON','INPUT'].includes(document.activeElement.tagName)){e.preventDefault();startTimer()}});updateInterface();
