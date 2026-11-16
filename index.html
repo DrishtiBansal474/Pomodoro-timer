@@ -3,17 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pomodoro Timer</title>
+  <meta name="theme-color" content="#f5f1ed" />
+  <title>Focus Flow — Pomodoro Timer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="timer-card">
-    <h1>Pomodoro Timer</h1>
-    <p id="time">25:00</p>
-    <button id="startBtn">Start</button>
-    <button id="resetBtn">Reset</button>
-  </div>
-
+  <main class="timer-card" aria-labelledby="app-title">
+    <header class="app-header"><div><p class="eyebrow">A calmer way to work</p><h1 id="app-title">focus<span>flow</span></h1></div><div class="today" aria-label="Completed focus sessions"><span id="sessionCount">0</span><small>today</small></div></header>
+    <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+      <button class="mode-btn active" data-mode="focus" role="tab" aria-selected="true">Focus</button><button class="mode-btn" data-mode="shortBreak" role="tab" aria-selected="false">Short break</button><button class="mode-btn" data-mode="longBreak" role="tab" aria-selected="false">Long break</button>
+    </div>
+    <section class="timer" aria-live="polite"><div class="progress-ring"><svg viewBox="0 0 260 260" aria-hidden="true"><circle class="track" cx="130" cy="130" r="116" /><circle class="progress" id="progressCircle" cx="130" cy="130" r="116" /></svg><div class="time-wrap"><p class="mode-label" id="modeLabel">Focus time</p><time id="time" datetime="PT25M">25:00</time><p class="hint" id="hint">One thing at a time.</p></div></div></section>
+    <div class="controls"><button class="icon-btn" id="resetBtn" aria-label="Reset timer" title="Reset timer">↺</button><button class="start-btn" id="startBtn" aria-label="Start focus timer"><span class="play-icon" aria-hidden="true">▶</span><span>Start focus</span></button><button class="icon-btn" id="skipBtn" aria-label="Skip to next timer mode" title="Skip to next mode">↠</button></div>
+    <footer class="card-footer"><p><span class="status-dot"></span><span id="statusText">Ready when you are</span></p><p class="keyboard-hint"><kbd>space</kbd> to start / pause</p></footer>
+  </main>
   <script src="script.js"></script>
 </body>
 </html>
