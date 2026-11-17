@@ -34,11 +34,21 @@ const focusMinutesInput = document.getElementById("focusMinutes");
 const shortBreakMinutesInput = document.getElementById("shortBreakMinutes");
 const longBreakMinutesInput = document.getElementById("longBreakMinutes");
 const autoStartToggle = document.getElementById("autoStartToggle");
+const challengeSelect = document.getElementById("challengeSelect");
+const backgroundSelect = document.getElementById("backgroundSelect");
+const musicStyleSelect = document.getElementById("musicStyleSelect");
+const musicPlatformSelect = document.getElementById("musicPlatformSelect");
+const musicLink = document.getElementById("musicLink");
+const goalProgressFill = document.getElementById("goalProgressFill");
+const goalProgressText = document.getElementById("goalProgressText");
+const challengeReward = document.getElementById("challengeReward");
+const themeToggle = document.getElementById("themeToggle");
 
 const defaultSettings = {
   focus: 25,
   shortBreak: 5,
   longBreak: 15,
+  dailyGoal: 4,
   autoStart: true
 };
 
@@ -46,6 +56,7 @@ const settings = {
   focus: storage.get("pomodoroFocusMinutes", defaultSettings.focus),
   shortBreak: storage.get("pomodoroShortBreakMinutes", defaultSettings.shortBreak),
   longBreak: storage.get("pomodoroLongBreakMinutes", defaultSettings.longBreak),
+  dailyGoal: storage.get("pomodoroDailyGoal", defaultSettings.dailyGoal),
   autoStart: storage.get("pomodoroAutoStart", defaultSettings.autoStart)
 };
 
@@ -75,18 +86,69 @@ const modes = {
 
 const modeOrder = ["focus", "shortBreak", "longBreak"];
 const circumference = 2 * Math.PI * 116;
+const challenges = {
+  2: { name: "Warm-up", reward: "Focus Starter badge" },
+  4: { name: "Consistency", reward: "Focus Flow badge" },
+  6: { name: "Deep work", reward: "Focus Champion badge" },
+  8: { name: "Power day", reward: "Focus Legend badge" }
+};
+const backgroundOptions = new Set(["default", "sunset", "ocean", "lavender", "meadow"]);
+const musicStyles = {
+  lofi: { label: "Lo-fi beats", query: "lofi instrumental focus music" },
+  ambient: { label: "Ambient", query: "ambient focus music no vocals" },
+  classical: { label: "Classical", query: "classical music for studying" },
+  nature: { label: "Nature sounds", query: "rain and nature sounds for focus" }
+};
+const musicPlatforms = {
+  youtube: { label: "YouTube", searchUrl: "https://www.youtube.com/results?search_query=" },
+  youtubeMusic: { label: "YouTube Music", searchUrl: "https://music.youtube.com/search?q=" },
+  spotify: { label: "Spotify", searchUrl: "https://open.spotify.com/search/" },
+  soundcloud: { label: "SoundCloud", searchUrl: "https://soundcloud.com/search/sounds?q=" }
+};
+let sessionDate = getLocalDateKey();
 
 let currentMode = "focus";
 let totalSeconds = modes.focus.seconds;
 let remainingSeconds = totalSeconds;
 let timerId = null;
 let isRunning = false;
-let completedSessions = Number.parseInt(storage.get("pomodoroSessions", "0"), 10) || 0;
+const storedSessionDate = storage.get("pomodoroSessionDate", sessionDate);
+let completedSessions = storedSessionDate === sessionDate
+  ? Number.parseInt(storage.get("pomodoroSessions", "0"), 10) || 0
+  : 0;
 let focusSessions = Number.parseInt(storage.get("pomodoroFocusSessions", "0"), 10) || 0;
 let statusOverride = null;
+let isDarkTheme = storage.get("pomodoroDarkTheme", false) === true;
+let currentBackground = storage.get("pomodoroBackground", "default");
+let selectedMusicStyle = storage.get("pomodoroMusicStyle", "lofi");
+let selectedMusicPlatform = storage.get("pomodoroMusicPlatform", "youtube");
 let tasks = storage.get("pomodoroTasks", [
   { id: Date.now(), text: "Review the most important task", done: false }
 ]);
+
+if (!backgroundOptions.has(currentBackground)) {
+  currentBackground = "default";
+}
+
+if (!musicStyles[selectedMusicStyle]) {
+  selectedMusicStyle = "lofi";
+}
+
+if (!musicPlatforms[selectedMusicPlatform]) {
+  selectedMusicPlatform = "youtube";
+}
+
+if (storedSessionDate !== sessionDate) {
+  storage.set("pomodoroSessionDate", sessionDate);
+  storage.set("pomodoroSessions", "0");
+}
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 function getModeLabel(mode = currentMode) {
   if (mode === "focus") return "focus";
@@ -113,6 +175,42 @@ function showTime() {
   progressCircle.style.strokeDashoffset = circumference * (1 - remainingSeconds / totalSeconds);
 }
 
+function updateGoalProgress() {
+  const challenge = challenges[settings.dailyGoal] || challenges[defaultSettings.dailyGoal];
+  const goal = Number(settings.dailyGoal);
+  const progress = Math.min(completedSessions / goal, 1);
+  const challengeComplete = completedSessions >= goal;
+
+  goalProgressFill.style.width = `${progress * 100}%`;
+  goalProgressText.textContent = `${challenge.name}: ${completedSessions} of ${goal} focus sessions`;
+  goalProgressFill.parentElement.setAttribute("aria-valuenow", String(Math.min(completedSessions, goal)));
+  goalProgressFill.parentElement.setAttribute("aria-valuemax", String(goal));
+  challengeReward.textContent = challengeComplete
+    ? `🏆 Challenge complete! Reward unlocked: ${challenge.reward}`
+    : `Reward: ${challenge.reward} at ${goal} sessions`;
+  challengeReward.classList.toggle("is-earned", challengeComplete);
+}
+
+function applyTheme() {
+  document.body.classList.toggle("dark-theme", isDarkTheme);
+  themeToggle.textContent = isDarkTheme ? "Light theme" : "Dark theme";
+  themeToggle.setAttribute("aria-pressed", String(isDarkTheme));
+  document.querySelector('meta[name="theme-color"]').content = isDarkTheme ? "#222a27" : "#f5f1ed";
+}
+
+function applyBackground() {
+  document.body.dataset.background = currentBackground;
+  backgroundSelect.value = currentBackground;
+}
+
+function updateMusicLink() {
+  const platform = musicPlatforms[selectedMusicPlatform];
+  const style = musicStyles[selectedMusicStyle];
+
+  musicLink.href = `${platform.searchUrl}${encodeURIComponent(style.query)}`;
+  musicLink.textContent = `Listen to ${style.label} on ${platform.label}`;
+}
+
 function updateInterface() {
   const mode = modes[currentMode];
   const action = isRunning ? "Pause" : "Start";
@@ -130,6 +228,7 @@ function updateInterface() {
   });
 
   sessionCount.textContent = completedSessions;
+  updateGoalProgress();
   showTime();
   startBtn.innerHTML = `<span class="play-icon" aria-hidden="true">${isRunning ? "Ⅱ" : "▶"}</span><span>${label}</span>`;
   startBtn.setAttribute("aria-label", label);
@@ -283,9 +382,17 @@ function completeTimer() {
   stopTimer({ preserveStatus: true });
 
   if (currentMode === "focus") {
+    const today = getLocalDateKey();
+    if (sessionDate !== today) {
+      sessionDate = today;
+      completedSessions = 0;
+      storage.set("pomodoroSessionDate", sessionDate);
+    }
+
     completedSessions += 1;
     focusSessions += 1;
     storage.set("pomodoroSessions", String(completedSessions));
+    storage.set("pomodoroSessionDate", today);
     storage.set("pomodoroFocusSessions", String(focusSessions));
     sessionCount.textContent = completedSessions;
   }
@@ -340,14 +447,23 @@ function skipMode() {
 }
 
 function initSettingsInputs() {
+  const savedChallenge = Number(settings.dailyGoal);
+  settings.dailyGoal = challenges[savedChallenge] ? savedChallenge : defaultSettings.dailyGoal;
+
   focusMinutesInput.value = settings.focus;
   shortBreakMinutesInput.value = settings.shortBreak;
   longBreakMinutesInput.value = settings.longBreak;
+  challengeSelect.value = String(settings.dailyGoal);
   autoStartToggle.checked = settings.autoStart;
 
   focusMinutesInput.addEventListener("change", syncModeValuesFromInputs);
   shortBreakMinutesInput.addEventListener("change", syncModeValuesFromInputs);
   longBreakMinutesInput.addEventListener("change", syncModeValuesFromInputs);
+  challengeSelect.addEventListener("change", () => {
+    settings.dailyGoal = Number(challengeSelect.value);
+    storage.set("pomodoroDailyGoal", settings.dailyGoal);
+    updateGoalProgress();
+  });
   autoStartToggle.addEventListener("change", () => {
     settings.autoStart = autoStartToggle.checked;
     saveSettings();
@@ -370,6 +486,26 @@ document.addEventListener("keydown", (event) => {
 });
 
 taskForm.addEventListener("submit", addTask);
+themeToggle.addEventListener("click", () => {
+  isDarkTheme = !isDarkTheme;
+  storage.set("pomodoroDarkTheme", isDarkTheme);
+  applyTheme();
+});
+backgroundSelect.addEventListener("change", () => {
+  currentBackground = backgroundSelect.value;
+  storage.set("pomodoroBackground", currentBackground);
+  applyBackground();
+});
+musicStyleSelect.addEventListener("change", () => {
+  selectedMusicStyle = musicStyleSelect.value;
+  storage.set("pomodoroMusicStyle", selectedMusicStyle);
+  updateMusicLink();
+});
+musicPlatformSelect.addEventListener("change", () => {
+  selectedMusicPlatform = musicPlatformSelect.value;
+  storage.set("pomodoroMusicPlatform", selectedMusicPlatform);
+  updateMusicLink();
+});
 
 if ("Notification" in window && Notification.permission === "default") {
   Notification.requestPermission();
@@ -377,4 +513,9 @@ if ("Notification" in window && Notification.permission === "default") {
 
 renderTasks();
 initSettingsInputs();
+applyTheme();
+applyBackground();
+musicStyleSelect.value = selectedMusicStyle;
+musicPlatformSelect.value = selectedMusicPlatform;
+updateMusicLink();
 updateInterface();
