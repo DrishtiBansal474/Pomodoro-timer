@@ -98,7 +98,7 @@ const challenges = {
   6: { name: "Deep work", reward: "Focus Champion badge" },
   8: { name: "Power day", reward: "Focus Legend badge" }
 };
-const backgroundOptions = new Set(["default", "sunset", "ocean", "lavender", "meadow"]);
+const backgroundOptions = new Set(["default", "aurora", "sunset", "ocean", "lavender", "meadow"]);
 const musicStyles = {
   lofi: { label: "Lo-fi beats", query: "lofi instrumental focus music" },
   ambient: { label: "Ambient", query: "ambient focus music no vocals" },

@@ -9,11 +9,16 @@ Focus Flow is a simple Pomodoro timer built with HTML, CSS, and vanilla JavaScri
 - Adjustable timer durations
 - Optional automatic start of the next session
 - Four daily challenges with progress tracking and unlockable rewards
+- Seven-day focus-session chart and consecutive-day streak tracking
+- Colorful badge unlocked after a 10-day focus streak
+- Weekly focus-session chart and current streak tracking
+- Colorful badge for a 10-day focus streak
 - Light and dark themes
-- Four colorful gradient backgrounds
+- Five colorful gradient backgrounds, including Aurora
+- Soft animated ambient glows that respect reduced-motion preferences
 - Focus music search links for lo-fi, ambient, classical, and nature sounds
 - YouTube, YouTube Music, Spotify, and SoundCloud platform choices
-- Task list with add, complete, and delete actions
+- Task list with add, complete, delete, completion counts, and clear-completed actions
 - Completion sound and browser notifications when permitted
 - Session counts, settings, and tasks saved in your browser
 - Spacebar shortcut to start or pause the timer
@@ -36,4 +41,4 @@ No dependencies or build step are required.
 6. Use **Reset** to restart the current interval or **Skip** to move to the next mode.
 7. Enable **Auto-start next session** if you want the next interval to begin automatically.
 
-Music links open searches on the selected third-party service; playback, availability, and any account requirements are controlled by that service. Your settings, theme, background, music choices, tasks, and completed-session counts are stored locally in the browser. Daily challenge progress resets at local midnight. Clearing the browser's site data will remove saved data.
+Music links open searches on the selected third-party service; playback, availability, and any account requirements are controlled by that service. Your settings, theme, background, music choices, tasks, daily history, and completed-session counts are stored locally in the browser. Daily challenge progress resets at local midnight. Clearing the browser's site data will remove saved data.
