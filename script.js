@@ -36,6 +36,12 @@ const longBreakMinutesInput = document.getElementById("longBreakMinutes");
 const autoStartToggle = document.getElementById("autoStartToggle");
 const challengeSelect = document.getElementById("challengeSelect");
 const backgroundSelect = document.getElementById("backgroundSelect");
+const statsSummary = document.getElementById("statsSummary");
+const statsChart = document.getElementById("statsChart");
+const streakBadge = document.getElementById("streakBadge");
+const streakBadgeText = document.getElementById("streakBadgeText");
+const taskProgress = document.getElementById("taskProgress");
+const clearCompletedTasksBtn = document.getElementById("clearCompletedTasksBtn");
 const musicStyleSelect = document.getElementById("musicStyleSelect");
 const musicPlatformSelect = document.getElementById("musicPlatformSelect");
 const musicLink = document.getElementById("musicLink");
@@ -117,7 +123,9 @@ let completedSessions = storedSessionDate === sessionDate
   ? Number.parseInt(storage.get("pomodoroSessions", "0"), 10) || 0
   : 0;
 let focusSessions = Number.parseInt(storage.get("pomodoroFocusSessions", "0"), 10) || 0;
+let dailyHistory = normalizeDailyHistory(storage.get("pomodoroDailyHistory", {}));
 let statusOverride = null;
+let hasTenDayBadge = storage.get("pomodoroTenDayBadge", false) === true;
 let isDarkTheme = storage.get("pomodoroDarkTheme", false) === true;
 let currentBackground = storage.get("pomodoroBackground", "default");
 let selectedMusicStyle = storage.get("pomodoroMusicStyle", "lofi");
@@ -143,11 +151,104 @@ if (storedSessionDate !== sessionDate) {
   storage.set("pomodoroSessions", "0");
 }
 
+if (completedSessions > (dailyHistory[sessionDate] || 0)) {
+  dailyHistory[sessionDate] = completedSessions;
+  storage.set("pomodoroDailyHistory", dailyHistory);
+}
+
 function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function normalizeDailyHistory(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.entries(value).reduce((history, [date, count]) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isInteger(count) && count > 0) {
+      history[date] = count;
+    }
+
+    return history;
+  }, {});
+}
+
+function getCurrentStreak() {
+  const date = new Date();
+  if (!dailyHistory[getLocalDateKey(date)]) {
+    date.setDate(date.getDate() - 1);
+  }
+
+  let streak = 0;
+  while (dailyHistory[getLocalDateKey(date)] > 0) {
+    streak += 1;
+    date.setDate(date.getDate() - 1);
+  }
+
+  return streak;
+}
+
+function getLastSevenDays() {
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - index));
+
+    return {
+      date: getLocalDateKey(date),
+      label: date.toLocaleDateString(undefined, { weekday: "short" }),
+      count: dailyHistory[getLocalDateKey(date)] || 0
+    };
+  });
+}
+
+function updateStats() {
+  const days = getLastSevenDays();
+  const weekTotal = days.reduce((total, day) => total + day.count, 0);
+  const currentStreak = getCurrentStreak();
+
+  if (currentStreak >= 10 && !hasTenDayBadge) {
+    hasTenDayBadge = true;
+    storage.set("pomodoroTenDayBadge", true);
+  }
+
+  statsSummary.textContent = `This week: ${weekTotal} sessions · Current streak: ${currentStreak} days · Lifetime: ${focusSessions}`;
+  streakBadge.classList.toggle("is-earned", hasTenDayBadge);
+  streakBadgeText.textContent = hasTenDayBadge
+    ? "10-day focus streak badge unlocked!"
+    : `10-day streak badge · ${Math.min(currentStreak, 10)} of 10 days`;
+
+  const maxCount = Math.max(1, ...days.map((day) => day.count));
+  statsChart.replaceChildren();
+
+  days.forEach((day) => {
+    const item = document.createElement("li");
+    item.className = "stats-day";
+    item.setAttribute("aria-label", `${day.label}: ${day.count} focus ${day.count === 1 ? "session" : "sessions"}`);
+
+    const count = document.createElement("span");
+    count.className = "stats-count";
+    count.textContent = day.count;
+
+    const track = document.createElement("div");
+    track.className = "stats-bar-track";
+    track.setAttribute("aria-hidden", "true");
+
+    const bar = document.createElement("div");
+    bar.className = "stats-bar";
+    bar.style.height = `${day.count === 0 ? 3 : Math.max(12, (day.count / maxCount) * 100)}%`;
+    track.appendChild(bar);
+
+    const label = document.createElement("span");
+    label.className = "stats-day-label";
+    label.textContent = day.label;
+
+    item.append(count, track, label);
+    statsChart.appendChild(item);
+  });
 }
 
 function getModeLabel(mode = currentMode) {
@@ -229,6 +330,7 @@ function updateInterface() {
 
   sessionCount.textContent = completedSessions;
   updateGoalProgress();
+  updateStats();
   showTime();
   startBtn.innerHTML = `<span class="play-icon" aria-hidden="true">${isRunning ? "Ⅱ" : "▶"}</span><span>${label}</span>`;
   startBtn.setAttribute("aria-label", label);
@@ -331,6 +433,10 @@ function renderTasks() {
     item.append(main, deleteButton);
     taskList.appendChild(item);
   });
+
+  const completedTasks = tasks.filter((task) => task.done).length;
+  taskProgress.textContent = `${completedTasks} of ${tasks.length} tasks complete`;
+  clearCompletedTasksBtn.disabled = completedTasks === 0;
 }
 
 function addTask(event) {
@@ -351,6 +457,12 @@ function addTask(event) {
   renderTasks();
   taskInput.value = "";
   taskInput.focus();
+}
+
+function clearCompletedTasks() {
+  tasks = tasks.filter((task) => !task.done);
+  saveTaskList();
+  renderTasks();
 }
 
 function saveSettings() {
@@ -391,9 +503,11 @@ function completeTimer() {
 
     completedSessions += 1;
     focusSessions += 1;
+    dailyHistory[today] = (dailyHistory[today] || 0) + 1;
     storage.set("pomodoroSessions", String(completedSessions));
     storage.set("pomodoroSessionDate", today);
     storage.set("pomodoroFocusSessions", String(focusSessions));
+    storage.set("pomodoroDailyHistory", dailyHistory);
     sessionCount.textContent = completedSessions;
   }
 
@@ -486,6 +600,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 taskForm.addEventListener("submit", addTask);
+clearCompletedTasksBtn.addEventListener("click", clearCompletedTasks);
 themeToggle.addEventListener("click", () => {
   isDarkTheme = !isDarkTheme;
   storage.set("pomodoroDarkTheme", isDarkTheme);

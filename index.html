@@ -17,7 +17,7 @@
         <p class="eyebrow">A calmer way to work</p>
         <h1 id="app-title">focus<span>flow</span></h1>
       </div>
-      <div class="today" aria-label="Completed focus sessions">
+      <div class="today" aria-label="Completed focus sessions today">
         <span id="sessionCount">0</span>
         <small>today</small>
       </div>
@@ -105,7 +105,24 @@
       </label>
     </section>
 
+    <section class="stats-panel" aria-labelledby="statsTitle">
+      <div class="stats-header">
+        <h2 id="statsTitle">Weekly stats</h2>
+        <p id="statsSummary">This week: 0 sessions · Current streak: 0 days</p>
+      </div>
+      <div class="streak-badge" id="streakBadge" aria-live="polite">
+        <span class="streak-badge-icon" aria-hidden="true">✦</span>
+        <span id="streakBadgeText">10-day badge · build your streak</span>
+      </div>
+      <ol class="stats-chart" id="statsChart" aria-label="Daily focus sessions for the last seven days"></ol>
+    </section>
+
     <section class="task-panel" aria-label="Focus tasks">
+      <div class="task-header">
+        <h2>Task list</h2>
+        <p id="taskProgress">0 tasks completed</p>
+        <button class="clear-tasks-btn" id="clearCompletedTasksBtn" type="button" disabled>Clear completed</button>
+      </div>
       <form id="taskForm" class="task-form">
         <input id="taskInput" type="text" maxlength="80" placeholder="Add a task" aria-label="Add a task" />
         <button type="submit">Add</button>
