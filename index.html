@@ -21,6 +21,7 @@
         <span id="sessionCount">0</span>
         <small>today</small>
       </div>
+      <button class="theme-btn" id="themeToggle" type="button" aria-pressed="false">Dark theme</button>
     </header>
 
     <div class="mode-tabs" role="tablist" aria-label="Timer mode">
@@ -68,6 +69,33 @@
         </label>
       </div>
 
+      <label class="goal-field" for="challengeSelect">
+        <span>Daily challenge</span>
+        <select id="challengeSelect">
+          <option value="2">Warm-up · 2 sessions</option>
+          <option value="4" selected>Consistency · 4 sessions</option>
+          <option value="6">Deep work · 6 sessions</option>
+          <option value="8">Power day · 8 sessions</option>
+        </select>
+      </label>
+      <label class="goal-field" for="backgroundSelect">
+        <span>Colorful background</span>
+        <select id="backgroundSelect">
+          <option value="default">Soft original</option>
+          <option value="sunset">Sunset</option>
+          <option value="ocean">Ocean</option>
+          <option value="lavender">Lavender</option>
+          <option value="meadow">Meadow</option>
+        </select>
+      </label>
+      <div class="goal-progress" aria-live="polite">
+        <div class="goal-progress-track" role="progressbar" aria-label="Daily focus goal progress" aria-valuemin="0" aria-valuenow="0" aria-valuemax="4">
+          <div class="goal-progress-fill" id="goalProgressFill"></div>
+        </div>
+        <p id="goalProgressText">0 of 4 focus sessions</p>
+        <p class="challenge-reward" id="challengeReward" aria-live="polite"></p>
+      </div>
+
       <label class="switch-row" for="autoStartToggle">
         <span>Auto-start next session</span>
         <span class="switch">
@@ -83,6 +111,40 @@
         <button type="submit">Add</button>
       </form>
       <ul id="taskList" class="task-list" aria-live="polite"></ul>
+    </section>
+
+    <section class="music-panel" aria-labelledby="musicTitle">
+      <div class="music-heading">
+        <h2 id="musicTitle">Focus music</h2>
+        <p>Pick a sound and listen on your favorite platform.</p>
+      </div>
+      <div class="music-controls">
+        <label class="setting-field">
+          <span>Sound</span>
+          <select id="musicStyleSelect">
+            <option value="lofi">Lo-fi beats</option>
+            <option value="ambient">Ambient</option>
+            <option value="classical">Classical</option>
+            <option value="nature">Nature sounds</option>
+          </select>
+        </label>
+        <label class="setting-field">
+          <span>Platform</span>
+          <select id="musicPlatformSelect">
+            <option value="youtube">YouTube</option>
+            <option value="youtubeMusic">YouTube Music</option>
+            <option value="spotify">Spotify</option>
+            <option value="soundcloud">SoundCloud</option>
+          </select>
+        </label>
+      </div>
+      <a
+        class="music-link"
+        id="musicLink"
+        href="https://www.youtube.com/results?search_query=lofi%20instrumental%20focus%20music"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Listen on YouTube</a>
     </section>
 
     <footer class="card-footer">

@@ -5,6 +5,10 @@
   --accent: #dd6b55;
   --accent-soft: #fbe8e2;
   --ring: #f1e9e4;
+  --page-background:
+    radial-gradient(circle at 14% 12%, #e1eee4 0, transparent 26rem),
+    radial-gradient(circle at 88% 84%, #f5dfd6 0, transparent 30rem),
+    #f6f3ed;
 }
 
 * {
@@ -19,12 +23,12 @@ body {
   padding: 24px;
   color: var(--ink);
   font-family: "DM Sans", Arial, sans-serif;
-  background: radial-gradient(circle at 14% 12%, #e1eee4 0, transparent 26rem),
-    radial-gradient(circle at 88% 84%, #f5dfd6 0, transparent 30rem), #f6f3ed;
+  background: var(--page-background);
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -95,6 +99,17 @@ h1 span {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.theme-btn {
+  padding: 8px 11px;
+  border: 1px solid #e7e3dc;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--paper);
+  cursor: pointer;
 }
 
 .mode-tabs {
@@ -250,7 +265,8 @@ time {
   font-weight: 600;
 }
 
-.setting-field input {
+.setting-field input,
+.setting-field select {
   width: 100%;
   padding: 8px 10px;
   border: 1px solid #e7e3dc;
@@ -310,6 +326,111 @@ time {
 
 .switch input:checked + .slider::before {
   transform: translateX(18px);
+}
+
+.goal-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.goal-field select {
+  max-width: 62%;
+  padding: 7px 9px;
+  border: 1px solid #e7e3dc;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+}
+
+.goal-progress {
+  margin-top: 10px;
+}
+
+.goal-progress-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eeeae3;
+}
+
+.goal-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+
+.goal-progress p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-align: right;
+}
+
+.goal-progress .challenge-reward {
+  min-height: 1em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.goal-progress .challenge-reward.is-earned {
+  animation: reward-pop 0.45s ease both;
+}
+
+@keyframes reward-pop {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.music-panel {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #eeeae3;
+}
+
+.music-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.music-heading p {
+  margin: 4px 0 12px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.music-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.music-link {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: var(--accent);
+}
+
+.music-link:hover {
+  filter: brightness(0.95);
 }
 
 .task-form {
@@ -410,6 +531,92 @@ time {
 .is-running .status-dot {
   background: #7eae7c;
   box-shadow: 0 0 0 3px #e2efdf;
+}
+
+body.dark-theme {
+  --ink: #edf2ed;
+  --muted: #aab8ae;
+  --paper: #303936;
+  --ring: #424c47;
+  color: var(--ink);
+  --page-background:
+    radial-gradient(circle at 14% 12%, #34453e 0, transparent 26rem),
+    radial-gradient(circle at 88% 84%, #493d39 0, transparent 30rem),
+    #222a27;
+}
+
+body[data-background="sunset"] {
+  --page-background:
+    radial-gradient(circle at 12% 14%, #ffd1b8 0, transparent 28rem),
+    radial-gradient(circle at 88% 82%, #f8b8c8 0, transparent 30rem),
+    #fff0dc;
+}
+
+body[data-background="ocean"] {
+  --page-background:
+    radial-gradient(circle at 12% 14%, #b8e4ed 0, transparent 28rem),
+    radial-gradient(circle at 88% 82%, #b9d1f4 0, transparent 30rem),
+    #e8f4f3;
+}
+
+body[data-background="lavender"] {
+  --page-background:
+    radial-gradient(circle at 12% 14%, #e2d2ff 0, transparent 28rem),
+    radial-gradient(circle at 88% 82%, #f6cde8 0, transparent 30rem),
+    #f5efff;
+}
+
+body[data-background="meadow"] {
+  --page-background:
+    radial-gradient(circle at 12% 14%, #c9edc9 0, transparent 28rem),
+    radial-gradient(circle at 88% 82%, #f0e9ad 0, transparent 30rem),
+    #eef5e5;
+}
+
+.dark-theme .timer-card {
+  border-color: rgba(237, 242, 237, 0.1);
+  background: rgba(42, 51, 47, 0.92);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+}
+
+.dark-theme .mode-tabs {
+  background: #252d29;
+}
+
+.dark-theme .mode-btn.active,
+.dark-theme .icon-btn,
+.dark-theme .theme-btn {
+  border-color: #46514b;
+  color: var(--ink);
+  background: #343e39;
+}
+
+.dark-theme .setting-field input,
+.dark-theme .setting-field select,
+.dark-theme .goal-field select,
+.dark-theme .task-form input {
+  border-color: #46514b;
+  color: var(--ink);
+  background: #252d29;
+}
+
+.dark-theme .task-item {
+  background: #343e39;
+}
+
+.dark-theme .utility-panel,
+.dark-theme .task-panel,
+.dark-theme .music-panel,
+.dark-theme .card-footer {
+  border-color: #46514b;
+}
+
+.dark-theme .goal-progress-track {
+  background: #46514b;
+}
+
+.dark-theme kbd {
+  border-color: #59645d;
 }
 
 kbd {
